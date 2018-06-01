@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Providers;
+namespace Pay2go;
 
 use Illuminate\Support\ServiceProvider;
-use Pay2go\CreditCard;
 
 class Pay2goServiceProvider extends ServiceProvider
 {
