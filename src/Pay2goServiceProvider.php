@@ -8,9 +8,7 @@ class Pay2goServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        $this->publishes([
-            __DIR__ . '/config/pay2go.php' => config_path('pay2go.php'),
-        ]);
+
     }
 
     public function register()
