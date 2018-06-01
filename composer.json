@@ -1,0 +1,25 @@
+{
+    "name": "seta0909/lumen-pay2go",
+    "description": "pay2go payment for lumen 5.6",
+    "homepage": "https://github.com/seta0909/lumen-pay2go",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Seta",
+            "email": "seta0909@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.2.0",
+        "illuminate/support": "~5.6",
+        "illuminate/http": "~5.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Pay2go\\": "src/"
+        }
+    },
+    "prefer-stable": true
+}
