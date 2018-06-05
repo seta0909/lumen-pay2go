@@ -27,6 +27,9 @@ class CreditCard
         }
     }
 
+    /**
+     * @return string
+     */
     public function getCreditCardAPIUrl()
     {
         if ($this->isProd) {
@@ -36,6 +39,13 @@ class CreditCard
         }
     }
 
+    /**
+     * @param string $parameter
+     * @param string $key
+     * @param string $iv
+     *
+     * @return string
+     */
     public function createMpgAesEncrypt($parameter = "", $key = "", $iv = "")
     {
         $returnStr = '';
@@ -48,6 +58,12 @@ class CreditCard
             OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, $iv)));
     }
 
+    /**
+     * @param     $string
+     * @param int $blocksize
+     *
+     * @return string
+     */
     public function addPadding($string, $blocksize = 32)
     {
         $len = strlen($string);
@@ -57,6 +73,11 @@ class CreditCard
         return $string;
     }
 
+    /**
+     * @param array $order
+     *
+     * @return CreditCard
+     */
     public function createOrder(array $order): CreditCard
     {
         $this->order = $order;
@@ -65,6 +86,11 @@ class CreditCard
         return $this;
     }
 
+    /**
+     * @param float $version
+     *
+     * @return CreditCard
+     */
     public function setVersion(float $version): CreditCard
     {
         $this->version = $version;
@@ -72,6 +98,9 @@ class CreditCard
         return $this;
     }
 
+    /**
+     * @return array
+     */
     public function encrypt()
     {
         //交易資料經 AES 加密後取得 TradeInfo
@@ -84,6 +113,12 @@ class CreditCard
         ];
     }
 
+    /**
+     * @param string $token
+     * @param string $tokenTerm
+     *
+     * @return CreditCard
+     */
     public function setToken(string $token, string $tokenTerm): CreditCard
     {
         $this->token = $token;
@@ -92,6 +127,9 @@ class CreditCard
         return $this;
     }
 
+    /**
+     * @return mixed
+     */
     public function payForToken()
     {
         $postData = [
@@ -114,6 +152,42 @@ class CreditCard
         return $this->post($request);
     }
 
+    /**
+     * @param string $tradeNo
+     * @param int    $amount
+     * @param int    $cancelType
+     *
+     * @return mixed
+     */
+    public function refund(string $tradeNo, int $amount)
+    {
+        $postData = [
+            'RespondType' => 'JSON',
+            'Version' => $this->version,
+            'Amt' => $amount,
+            'TimeStamp' => time(),
+            'IndexType' => 2,
+            'TradeNo' => $tradeNo,
+            'CloseType' => 2,
+            'Cancel' => 1
+        ];
+        $this->order = $postData;
+        $encrypt = $this->encrypt();
+
+        $request = [
+            'MerchantID_' => $this->merchant_id,
+            'PostData_' => $encrypt['TradeInfo'],
+            'Pos_' => 'JSON'
+        ];
+
+        return $this->post($request);
+    }
+
+    /**
+     * @param $postData
+     *
+     * @return mixed
+     */
     public function post($postData)
     {
         $ch = curl_init();
