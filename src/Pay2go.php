@@ -18,8 +18,8 @@ class CreditCard
     public function __construct()
     {
         $this->merchant_id = config('pay2go.merchant_id');
-        $this->iv = config('pay2go.merchant_key');
-        $this->key = config('pay2go.merchant_iv');
+        $this->key = config('pay2go.merchant_key');
+        $this->iv = config('pay2go.merchant_iv');
         $this->isProd = config('pay2go.is_prod');
 
         if (is_null($this->merchant_id) || is_null($this->iv) || is_null($this->key)) {
@@ -27,9 +27,6 @@ class CreditCard
         }
     }
 
-    /**
-     * @return string
-     */
     public function getCreditCardAPIUrl()
     {
         if ($this->isProd) {
@@ -39,13 +36,6 @@ class CreditCard
         }
     }
 
-    /**
-     * @param string $parameter
-     * @param string $key
-     * @param string $iv
-     *
-     * @return string
-     */
     public function createMpgAesEncrypt($parameter = "", $key = "", $iv = "")
     {
         $returnStr = '';
@@ -58,12 +48,6 @@ class CreditCard
             OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, $iv)));
     }
 
-    /**
-     * @param     $string
-     * @param int $blocksize
-     *
-     * @return string
-     */
     public function addPadding($string, $blocksize = 32)
     {
         $len = strlen($string);
@@ -73,11 +57,6 @@ class CreditCard
         return $string;
     }
 
-    /**
-     * @param array $order
-     *
-     * @return CreditCard
-     */
     public function createOrder(array $order): CreditCard
     {
         $this->order = $order;
@@ -86,11 +65,6 @@ class CreditCard
         return $this;
     }
 
-    /**
-     * @param float $version
-     *
-     * @return CreditCard
-     */
     public function setVersion(float $version): CreditCard
     {
         $this->version = $version;
@@ -98,9 +72,6 @@ class CreditCard
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function encrypt()
     {
         //交易資料經 AES 加密後取得 TradeInfo
@@ -113,12 +84,6 @@ class CreditCard
         ];
     }
 
-    /**
-     * @param string $token
-     * @param string $tokenTerm
-     *
-     * @return CreditCard
-     */
     public function setToken(string $token, string $tokenTerm): CreditCard
     {
         $this->token = $token;
@@ -127,9 +92,6 @@ class CreditCard
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
     public function payForToken()
     {
         $postData = [
@@ -152,47 +114,12 @@ class CreditCard
         return $this->post($request);
     }
 
-    /**
-     * @param string $tradeNo
-     * @param int    $amount
-     * @param int    $cancelType
-     *
-     * @return mixed
-     */
-    public function refund(string $tradeNo, int $amount)
-    {
-        $postData = [
-            'RespondType' => 'JSON',
-            'Version' => $this->version,
-            'Amt' => $amount,
-            'TimeStamp' => time(),
-            'IndexType' => 2,
-            'TradeNo' => $tradeNo,
-            'CloseType' => 2,
-            'Cancel' => 1
-        ];
-        $this->order = $postData;
-        $encrypt = $this->encrypt();
-
-        $request = [
-            'MerchantID_' => $this->merchant_id,
-            'PostData_' => $encrypt['TradeInfo'],
-            'Pos_' => 'JSON'
-        ];
-
-        return $this->post($request);
-    }
-
-    /**
-     * @param $postData
-     *
-     * @return mixed
-     */
     public function post($postData)
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->getCreditCardAPIUrl());
         curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
         $response = curl_exec($ch);
         curl_close($ch);
