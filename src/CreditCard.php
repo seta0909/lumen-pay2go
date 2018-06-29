@@ -101,18 +101,19 @@ class CreditCard
         return $this;
     }
 
-    public function refund(string $tradeNo, int $amount)
+    public function refund(string $tradeNo, int $orderId, int $amount, string $desc)
     {
         $postData = [
             'RespondType' => 'JSON',
             'Version' => '1.0',
             'Amt' => $amount,
-            'MerchantOrderNo' => '',
+            'MerchantOrderNo' => $orderId,
             'IndexType' => 2,
             'TimeStamp' => time(),
             'TradeNo' => $tradeNo,
             'CloseType' => 2,
-            'Cancel' => 1
+            'Cancel' => 1,
+            'ProdDesc' => $desc
         ];
 
         $this->order = $postData;
@@ -121,9 +122,10 @@ class CreditCard
         $request = [
             'MerchantID_' => $this->merchant_id,
             'PostData_' => $encrypt['TradeInfo'],
+            'Pos_' => 'JSON'
         ];
 
-        return $this->post($request);
+        return $this->cancel($request);
     }
 
     public function payForToken()
@@ -152,6 +154,19 @@ class CreditCard
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->getCreditCardAPIUrl());
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        return $response;
+    }
+
+    public function cancel($postData)
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $this->getCreditCardRefundAPIUrl());
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
