@@ -27,6 +27,15 @@ class CreditCard
         }
     }
 
+    public function getCreditCardRefundAPIUrl()
+    {
+        if ($this->isProd) {
+            return 'https://core.spgateway.com/API/CreditCard/Close';
+        } else {
+            return 'https://ccore.spgateway.com/API/CreditCard/Close';
+        }
+    }
+
     public function getCreditCardAPIUrl()
     {
         if ($this->isProd) {
@@ -90,6 +99,30 @@ class CreditCard
         $this->token_term = $tokenTerm;
 
         return $this;
+    }
+
+    public function refund(string $tradeNo, int $amount)
+    {
+        $postData = [
+            'RespondType' => 'JSON',
+            'Amt' => $amount,
+            'MerchantOrderNo' => '',
+            'IndexType' => 2,
+            'TimeStamp' => time(),
+            'TradeNo' => $tradeNo,
+            'CloseType' => 2,
+            'Cancel' => 1
+        ];
+
+        $this->order = $postData;
+        $encrypt = $this->encrypt();
+
+        $request = [
+            'MerchantID_' => $this->merchant_id,
+            'PostData_' => $encrypt['TradeInfo'],
+        ];
+
+        return $this->post($request);
     }
 
     public function payForToken()
