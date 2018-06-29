@@ -105,6 +105,7 @@ class CreditCard
     {
         $postData = [
             'RespondType' => 'JSON',
+            'Version' => '1.0',
             'Amt' => $amount,
             'MerchantOrderNo' => '',
             'IndexType' => 2,
